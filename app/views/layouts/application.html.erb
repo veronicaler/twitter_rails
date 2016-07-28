@@ -13,7 +13,7 @@
   <body>
 
     <h1><%= heading_detail( yield(:heading) ) %></h1>
-    
+
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
@@ -34,6 +34,17 @@
             <li>
               <%= link_to "About", about_path %>
             </li>
+            <% if logged_in? %>
+            <li>
+              <%= link_to "My page", current_user %>
+            </li>
+            <li>
+              <%= link_to "Log Out", logout_path %>
+            </li>
+            <% else %>
+            <li><%= link_to "Signup", signup_path %>
+            </li>
+            <% end %>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
@@ -41,11 +52,20 @@
 
     <div class="container">
       <div class="jumbotron">
+
+      <% flash.each do |message_type, message| %>
+      <div class="alert alert-<%= message_type %>">
+        <%= message %>
+      </div>
+      <% end %>
+
+
         <%= yield %>
       </div>
     </div>
 
     <footer class="footer container">
+      <%= debug(params) if Rails.env.development? %>
       <small>
         Twitter made by <a href="http://altabepha.com/">Prima Aulia Gusta</a>
       </small>

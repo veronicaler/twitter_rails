@@ -1,5 +1,16 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :edit, :update, :destroy]
+  # setting default user, based on the id
+  before_action :set_user,       only:   [:show, :edit, :update, :destroy]
+
+  # check if already logged in
+  before_action :require_login,  only:   [:show, :edit, :update, :destroy]
+
+  # check if correct user
+  before_action :correct_user,   only:   [:edit, :update, :destroy]
+
+  # check if needs log out again
+  before_action :require_logout, only: [:new]
+
 
   # GET /users
   # GET /users.json
@@ -24,7 +35,7 @@ class UsersController < ApplicationController
   # POST /users
   # POST /users.json
   def create
-    @user = User.new(user_params)
+    @user = User.new(permitted_user_params)
 
     respond_to do |format|
       if @user.save
@@ -68,7 +79,36 @@ class UsersController < ApplicationController
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
-    def user_params
-      params.require(:user).permit(:name, :email)
+    def permitted_user_params
+      params.require(:user).permit(:name, :email, :password, :password_confirmation)
     end
+    def require_login
+      #check if the user is logged in or not
+      unless logged_in?
+        flash[:danger] = "NO WAY JOSE!"
+        redirect_to root_url # halts request cycle
+      end
+    end
+
+    # Confirms the correct user.
+    def correct_user
+      @user = User.find(params[:id])
+
+      unless current_user?(@user)
+        flash[:warning] = "YOU ARE NOT JOSE"
+        redirect_to root_url
+      end
+    end
+
+    def require_logout
+      if logged_in?
+        flash[:warning] = "You must logged out to create a new user"
+        redirect_to(root_url)
+      end
+    end
+
+
+
+
+
 end
